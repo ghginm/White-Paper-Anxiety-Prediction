@@ -1,4 +1,4 @@
-# White-Paper-Anxiety-Prediction ([Read the Paper (PDF)](Developing_A_Machine_Learning_Model_to_Predict_Anxiety_Levels.pdf))
+# White Paper: Anxiety Prediction ([Read the Paper (PDF)](Developing_A_Machine_Learning_Model_to_Predict_Anxiety_Levels.pdf))
 
 This project explores the use of **machine learning** to predict **anxiety levels** using **mobile sensing data**. Our aim is to improve early detection of anxiety disorders, leveraging real-world behavioral patterns instead of traditional clinical assessments.
 
@@ -22,7 +22,7 @@ Develop a **reliable ML model** that can **identify anxiety disorders** with hig
   * Sleep patterns
   * GPS mobility
   * Self-reported well-being
-* **Class Imbalance:** \~1:4 (Anxiety vs. Healthy)
+* **Class Imbalance:** \~1:4 (Anxiety vs Healthy)
 
 ## Understanding Model Probabilities
 
@@ -36,6 +36,8 @@ In healthcare, **well-calibrated probabilities** are crucial. They aid in inform
 
 ### Example Calculation
 
+Sure! Here’s the updated example snippet with the full formula included:
+
 > If:
 >
 > * Prevalence (prior) = 0.05
@@ -45,7 +47,13 @@ In healthcare, **well-calibrated probabilities** are crucial. They aid in inform
 > Then:
 >
 > $$
-> P(\text{anxiety} \mid +) = \frac{0.9 \cdot 0.05}{0.9 \cdot 0.05 + 0.1 \cdot 0.95} \approx 0.346
+> P(\text{anxiety} \mid +) = \frac{P(+ \mid \text{anxiety}) \ P(\text{anxiety})}{P(+ \mid \text{anxiety}) \ P(\text{anxiety}) + P(+ \mid \text{healthy}) \ P(\text{healthy})}
+> $$
+>
+> Numerically:
+>
+> $$
+> P(\text{anxiety} \mid +) = \frac{0.9 \times 0.05}{0.9 \times 0.05 + 0.1 \times 0.95} \approx 0.346
 > $$
 
 This means that **even a strong test yields modest confidence** under low prevalence.
@@ -53,7 +61,11 @@ This means that **even a strong test yields modest confidence** under low preval
 * As the **prior increases**, posterior probabilities improve
 * Even with a **99% TPR**, a low prior suppresses confidence
 
-## Traditional Tests vs. Machine Learning
+## Traditional Tests vs Machine Learning
+
+To some degree, ML models are more robust to this issue because, if the training set is representative of operational conditions, the classifier’s output will provide a good estimate of the probability of class membership under those conditions, i.e., the posterior probability $P(\text{anxiety} \mid +).$ This also depends on the cost function, though to a lesser degree. However, this robustness is not guaranteed, particularly when the training procedure is modified to account for data imbalance. Such modifications can improve accuracy for the minority class but may result in output probabilities that are not well calibrated. Furthermore, having a representative training set is essential yet challenging, especially in the context of small datasets, which are often supplemented with synthetic data.
+
+In our view, it is crucial to keep these considerations in mind, even if a given model results in a low out-of-sample error. For example, while being an accurate classifier, Random Forest (RF) is known to produce poorly calibrated probabilities, which can mislead downstream decision-making processes, especially when these probabilities are interpreted as confidence scores. This limitation becomes particularly problematic in healthcare applications, where decisions often depend on reliable probabilistic estimates rather than simple binary predictions.
 
 | Aspect                   | Traditional Tests | ML Models                     |
 | ------------------------ | ----------------- | ----------------------------- |
@@ -68,6 +80,8 @@ This means that **even a strong test yields modest confidence** under low preval
 
 * Probabilities were **well-calibrated**
 * Posterior matched **true class distribution**
+
+Proper probabilities suggest that the model has effectively incorporated the prior, which is crucial in case of substantial class imbalance. It also indicates that the classifier is less reliant on a specific classification threshold.
 
 <div align="center">
   <img alt="Probability Calibration" src="figures/probabilities.png" width="650">
